@@ -1,4 +1,4 @@
-
+const User = require('../users/users-model');
 /*
   If the user does not have a session saved in the server
 
@@ -21,7 +21,21 @@ function restricted(req, res, next) {
   }
 */
 function checkUsernameFree(req, res, next) {
-  next()
+  // console.log('you are in the check user name is free middleware');
+  // next()
+  User.findBy({ username: req.body.username })
+    .then(users => {
+      // console.log(user)
+      if(!users.length) { //google this .length
+        next()
+      } else {
+        res.json({
+          status: 422,
+          message: 'Username taken'
+        })
+      }
+    })
+    .catch(next)
 }
 
 /*
@@ -33,7 +47,21 @@ function checkUsernameFree(req, res, next) {
   }
 */
 function checkUsernameExists(req, res, next) {
-  next()
+  // console.log('you are in the check if username exists middleware');
+  // next()
+  User.findBy({ username: req.body.username })
+    .then(users => {
+      // console.log(user)
+      if(users.length) { //google this .length
+        next()
+      } else {
+        res.json({
+          status: 401,
+          message: 'Invalid credentials'
+        })
+      }
+    })
+    .catch(next)
 }
 
 /*
@@ -45,7 +73,16 @@ function checkUsernameExists(req, res, next) {
   }
 */
 function checkPasswordLength(req, res, next) {
-  next()
+  // console.log('you are in the check password length middleware');
+  // next()
+  if( !req.body.password || req.body.password.length < 3 ) {
+    next({
+      message: 'Password must be longer than 3 chars',
+      status: 422
+    })
+  } else {
+    next()
+  }
 }
 
 // Don't forget to add these to the `exports` object so they can be required in other modules
