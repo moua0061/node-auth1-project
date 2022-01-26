@@ -8,8 +8,16 @@ const User = require('../users/users-model');
   }
 */
 function restricted(req, res, next) {
-  console.log('you are in the restricted middleware');
-  next()
+  // console.log('you are in the restricted middleware');
+  // next()
+  if(req.session.user) {
+    next()
+  } else {
+    next({
+      status: 401,
+      message: 'You shall not pass!'
+    })
+  }
 }
 
 /*
@@ -29,7 +37,7 @@ function checkUsernameFree(req, res, next) {
       if(!users.length) { //google this .length
         next()
       } else {
-        res.json({
+        next({
           status: 422,
           message: 'Username taken'
         })
@@ -53,6 +61,8 @@ function checkUsernameExists(req, res, next) {
     .then(users => {
       // console.log(user)
       if(users.length) { //google this .length
+        req.user = users[0]
+        //console.log(req.user)
         next()
       } else {
         res.json({
